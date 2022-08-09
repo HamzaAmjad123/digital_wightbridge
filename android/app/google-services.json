@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "549597986200",
+    "project_id": "digitalweightbridge",
+    "storage_bucket": "digitalweightbridge.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:549597986200:android:01f6b586a16bfa94727fed",
+        "android_client_info": {
+          "package_name": "com.example.digital_weighbridge"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "549597986200-44mt4r14oun1dbof6v52gr9sl8btu5ak.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_Aoi21yt5qzz-xeRV5MSgL_ADzkZ4CxU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "549597986200-44mt4r14oun1dbof6v52gr9sl8btu5ak.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

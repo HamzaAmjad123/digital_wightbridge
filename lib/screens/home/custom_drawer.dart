@@ -7,11 +7,13 @@
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:digital_weighbridge/helper_services/custom_snacbar.dart';
+import 'package:digital_weighbridge/screens/Authentication.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:get_storage/get_storage.dart';
 
 import '../../configs/colors.dart';
 import '../../helper_services/navigation_services.dart';
@@ -21,6 +23,7 @@ import '../../helper_widgets/drawer_widget.dart';
 import '../../models/user_model.dart';
 import '../Auth/login_screen.dart';
 import '../profile.dart';
+import '../qr_code.dart';
 import 'home_screen.dart';
 
 class CustomDrawer extends StatefulWidget {
@@ -34,6 +37,10 @@ class _CustomDrawerState extends State<CustomDrawer> {
   @override
   Widget build(BuildContext context) {
     UserModel usermodels = UserModel();
+    final box=GetStorage();
+    usermodels= UserModel.fromJson(box.read('user'));
+// out: GetX is the best
+    print(usermodels);
     return Drawer(
       child: ListView(children: [
         Container(
@@ -44,43 +51,53 @@ class _CustomDrawerState extends State<CustomDrawer> {
           ),
           child: Text("Welcome",
               style: Get.textTheme.headline5!.merge(
-                  TextStyle(fontWeight: FontWeight.normal,fontSize: 20))),
+                  TextStyle(color: Colors.white,fontWeight: FontWeight.normal,fontSize: 20))),
         ),
         UserAccountsDrawerHeader(
           decoration: BoxDecoration(
             color: bgColor,
           ),
-          accountName: Text("asda ali",
-            //usermodels.userName!,
-            style: TextStyle(color: Colors.black),
+           accountName: Text(usermodels.userName!,
+            style: TextStyle(color: Colors.white),
           ),
-          accountEmail: Text("asda ali@gmail.com",
-           // usermodels.email!,
-            style: TextStyle(color: Colors.black),
+          accountEmail: Text(
+            usermodels.email!,
+            style: TextStyle(color: Colors.white),
           ),
           currentAccountPicture: Stack(
             children: [
-              SizedBox(
-                width: 80,
-                height: 80,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.all(Radius.circular(80)),
-                  child: CachedNetworkImage(
-                    height: 80,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    imageUrl: "https://picsum.photos/250?image=9",
-                    placeholder: (context, url) => Image.asset(
-                      "assets/images/place_holder.png",
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: 80,
-                    ),
-                    errorWidget: (context, url, error) =>
-                        Icon(Icons.error_outline),
-                  ),
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.black,
                 ),
+                child: usermodels.imgUrl == null ? Image.asset(
+                  "assets/images/profile_picture.png", fit: BoxFit
+                    .cover,) : Image.network(usermodels.imgUrl!,fit: BoxFit.cover,),
               ),
+              // SizedBox(
+              //   width: 80,
+              //   height: 80,
+              //   child: ClipRRect(
+              //     borderRadius: BorderRadius.all(Radius.circular(80)),
+              //     child: CachedNetworkImage(
+              //       height: 80,
+              //       width: double.infinity,
+              //       fit: BoxFit.cover,
+              //       imageUrl: "https://picsum.photos/250?image=9",
+              //       placeholder: (context, url) => Image.asset(
+              //         "assets/images/place_holder.png",
+              //         fit: BoxFit.cover,
+              //         width: double.infinity,
+              //         height: 80,
+              //       ),
+              //       errorWidget: (context, url, error) =>
+              //           Icon(Icons.error_outline),
+              //     ),
+              //   ),
+              // ),
             ],
           ),
         ),
@@ -107,10 +124,19 @@ class _CustomDrawerState extends State<CustomDrawer> {
         ),
 
         DrawerLinkWidget(
-          icon: Icons.chat_outlined,
-          text: "Default",
+          icon: Icons.list,
+          text: "All Orders",
           onTap: () async {
             Get.back();
+          },
+        ),
+        DrawerLinkWidget(
+          icon: Icons.qr_code,
+          text: "Qr Code",
+          onTap: () async {
+            Navigator.of(context).pop();
+            NavigationServices.goNextAndKeepHistory(context: context, widget: QrCode());
+            setState((){});
           },
         ),
         ListTile(
@@ -133,7 +159,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
         ),
         DrawerLinkWidget(
           icon: Icons.person_outline,
-          text: "Privacy Policy",
+          text: "Contact Us",
           onTap: () async {
             Get.back();
           },

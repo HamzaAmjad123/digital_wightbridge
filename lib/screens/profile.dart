@@ -1,8 +1,19 @@
+import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:digital_weighbridge/configs/colors.dart';
 import 'package:digital_weighbridge/screens/Authentication.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:image_picker/image_picker.dart';
+import '../helper_services/custom_loader.dart';
+import '../helper_services/custom_snacbar.dart';
+import '../helper_services/navigation_services.dart';
+import '../helper_widgets/custom_button.dart';
 import '../helper_widgets/custom_textfield.dart';
 import '../models/user_model.dart';
+import 'home/home_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -12,23 +23,29 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final _auth = FirebaseAuth.instance;
   UserModel usermodels = UserModel();
-  // late File imageFile;
+  final box=GetStorage();
+  File? imageFile;
   bool uploading = false;
+  String imageUrl = "";
+  final _firestore = FirebaseFirestore.instance;
+  bool _show = false;
+
   @override
-  oninit()async{
+  initState(){
     print("on in it");
     super.initState();
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) async =>  usermodels=await Authentication().getUser());
-    print(usermodels.userName);
-    print(usermodels.email);
-
+    getUser();
+  }
+  Future<void> getUser()async{
+    usermodels= UserModel.fromJson(box.read('user'));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomSheet: _showBottomSheet(),
       body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -37,41 +54,50 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Stack(
               children: [
                 Container(
-                  width: MediaQuery.of(context).size.width,
+                  width: MediaQuery
+                      .of(context)
+                      .size
+                      .width,
                   height: 250,
-                  child: Center(
-                    child: Stack(children: [
-                      Container(
-                        width: 90,
-                        height: 90,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.black,
-                        ),
-                        child: usermodels.imgUrl==null?Image.asset("assets/images/profile_picture.png",fit: BoxFit.cover,):Image.network(usermodels.imgUrl!),
-                      ),
-                        Positioned(
-                          top: 60,
-                          left: 65,
-                          child: GestureDetector(
-                            onTap: (){
-
-                            },
-                            child: Container(
-                              width: 30,
-                              height: 30,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.black87
+                    child: Container(
+                      margin: EdgeInsets.only(top: MediaQuery.of(context).size.height/8,left:MediaQuery.of(context).size.width/3 ),
+                        child: Stack(children: [
+                          Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.black,
+                            ),
+                            child: usermodels.imgUrl == null ? Image.asset(
+                              "assets/images/profile_picture.png", fit: BoxFit
+                                .cover,) :imageUrl==""?Image.network(usermodels.imgUrl!,fit: BoxFit.fill,):Image.network(imageUrl,fit: BoxFit.fill,),
+                          ),
+                          Positioned(
+                            top: 65,
+                            left: 70,
+                            child: GestureDetector(
+                              onTap: () {
+                                _show = true;
+                                setState(() {});
+                              },
+                              child: Container(
+                                width: 30,
+                                height: 30,
+                                decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color:  Color(0xFFF5F6F9),
+                                ),
+                                child: Icon(Icons.camera_alt_outlined,
+                                  color: Colors.green,),
                               ),
-                              child: Icon(Icons.camera_alt_outlined,color: Colors.green,),
                             ),
                           ),
-                        ),
 
 
-                    ],)
-                  ),
+                        ],)
+                    ),
+
                   decoration: BoxDecoration(
                       color: bgColor,
                       borderRadius: BorderRadius.only(
@@ -86,28 +112,73 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+
                   CustomTextField(
-                    headerText: "userName",
-                    hintText: "Name",
+                    headerText: "UserName",
+                    hintText: usermodels.userName,
                     inputAction: TextInputAction.next,
+                    isSelected: true,
+                    onChange: (value){
+                    },
                   ),
-                  CustomTextField(
-                    headerText: "Password",
-                    hintText: "Name",
-                    inputAction: TextInputAction.next,
-                  ),
+                  // CustomTextField(
+                  //   headerText: "email",
+                  //   hintText: usermodels.email,
+                  //   inputAction: TextInputAction.next,
+                  // ),
                   CustomTextField(
                     headerText: "PhoneNumber",
-                    hintText: "Name",
+                    hintText: usermodels.phoneNumber,
                     inputAction: TextInputAction.next,
+
+                    isSelected: true,
                   ),
-                  Text(
-                    "Profile Photo",
-                    style: TextStyle(
-                        height: 2.3,
-                        color: Colors.black87,
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w500),
+
+                  Text("Email",style: TextStyle(color: Colors.black54,fontSize: 16.0,height: 1.5),),
+                  Container(
+
+                    margin: EdgeInsets.symmetric(vertical: 10.0),
+                    padding: EdgeInsets.symmetric(vertical: 8.0,horizontal: 10.0),
+                    height: 45.0,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+
+                      border: Border.all(color: blackColor),
+                        borderRadius: BorderRadius.circular(12.0),),
+                    child: Text(
+                      usermodels.email!,style: TextStyle(color: blackColor,fontSize: 16.0,fontWeight: FontWeight.w500,),
+
+                    ),
+                  ),
+                  // Text(usermodels.imgUrl == null ? "Upload Profile Picture" : ImageUrl,
+                  //   style: TextStyle(
+                  //       height: 2.3,
+                  //       color: Colors.black87,
+                  //       fontSize: 16.0,
+                  //       fontWeight: FontWeight.w500),
+                  // ),
+                  CustomButton(
+                    width: MediaQuery
+                        .of(context)
+                        .size
+                        .width * 0.9,
+                    buttonColor: bgColor,
+                    fontWeight: FontWeight.bold,
+
+                    onTap: () async {
+                      if(imageUrl==""){
+                        CustomSnackBar.failedSnackBar(context: context, message: "No Image Selected");
+                      }else{
+                        await updateInfo();
+                        CustomSnackBar.showSnackBar(context: context, message: "Picture Uploaded");
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>HomeScreen()));
+                      }
+
+
+                    },
+                    text: "Save",
+                    fontSize: 18.0,
+                    verticalMargin: 15.0,
                   ),
 
                 ],
@@ -118,34 +189,104 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
-  // Future getImage(ImageSource source) async {
-  //   ImagePicker imagePicker = ImagePicker();
-  //   XFile? pickedFile;
-  //
-  //   pickedFile = await imagePicker.pickImage(source: source);
-  //   imageFile = File(pickedFile.path);
-  //
-  //   if (imageFile != null) {
-  //     try {
-  //       uploading = true;
-  //       setState((){});
-  //       return await uploadFile(imageFile);
-  //     } catch (e) {
-  //       CustomSnackBar.showSnackBar(context: context, message: e.toString());
-  //     }
-  //   } else {
-  //     CustomSnackBar.failedSnackBar(context: context, message: "Please select an image file");
-  //   }
-  // }
-  // Future<String> uploadFile(File image) async {
-  //   String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-  //   Reference reference = FirebaseStorage.instance.ref().child(fileName);
-  //   UploadTask uploadTask = reference.putFile(image);
-  //   return uploadTask.then((TaskSnapshot storageTaskSnapshot) {
-  //     return storageTaskSnapshot.ref.getDownloadURL();
-  //   }, onError: (e) {
-  //     throw Exception(e.toString());
-  //   });
-  // }
+
+  Future getImage(ImageSource source) async {
+    ImagePicker imagePicker = ImagePicker();
+    XFile? pickedFile;
+
+    pickedFile = await imagePicker.pickImage(source: source);
+    imageFile = File(pickedFile!.path);
+
+    if (imageFile != null) {
+      try {
+        uploading = true;
+        imageUrl = await uploadFile(imageFile!);
+        setState(() {});
+        return imageUrl;
+      } catch (e) {
+        CustomSnackBar.showSnackBar(context: context, message: e.toString());
+      }
+    } else {
+      CustomSnackBar.failedSnackBar(
+          context: context, message: "Please select an image file");
+    }
+  }
+
+  Future<String> uploadFile(File image) async {
+    String fileName = DateTime
+        .now()
+        .millisecondsSinceEpoch
+        .toString();
+    Reference reference = FirebaseStorage.instance.ref().child(fileName);
+    UploadTask uploadTask = reference.putFile(image);
+    return uploadTask.then((TaskSnapshot storageTaskSnapshot) {
+      return storageTaskSnapshot.ref.getDownloadURL();
+    }, onError: (e) {
+      throw Exception(e.toString());
+    });
+  }
+
+  updateInfo() async {
+    FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
+    //var firebaseUser = await FirebaseAuth.instance.currentUser!;
+   await firebaseFirestore.collection("users").doc(usermodels.uid).update(
+        {
+          "imgUrl" : imageUrl,
+        }).then((_){
+      print("success!");
+    });
+
+    //for email
+    //for password
+    //for phone number
+    //for picture
+  }
+  Widget _showBottomSheet()
+  {
+    if(_show)
+    {
+      return BottomSheet(
+        onClosing: () {
+
+        },
+        builder: (context) {
+          return Container(
+            height: 120,
+            width: double.infinity,
+            color: Colors.grey.shade200,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextButton.icon(onPressed: (){
+                    _show=false;
+                    setState(() {});
+                    getImage(ImageSource.gallery);
+                    // setState(() {});
+                  }, label: Text("Choose From Gallery",style: TextStyle(color: Colors.black),),icon: Icon(Icons.photo,color: Colors.black,),),
+                  Divider(
+                    thickness: 1,
+                    color: Colors.black,
+                  ),
+                  TextButton.icon(onPressed: (){
+                    _show=false;
+                    setState(() {});
+                    getImage(ImageSource.camera);
+                    // setState(() {});
+                  }, label: Text("Open Camera",style: TextStyle(color: Colors.black)),icon: Icon(Icons.camera_alt_sharp,color: Colors.black),),
+                ],
+              ),
+            )
+          );
+        },
+      );
+    }
+    else{
+      print(_show);
+      return Text("");
+    }
+  }
 
 }

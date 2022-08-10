@@ -16,7 +16,8 @@ class CustomVehiclesCard extends StatelessWidget {
     return   InkWell(
       onTap: onTap,
       child: Card(
-        margin: EdgeInsets.symmetric(vertical: 12.0,horizontal: 5.0),
+
+        margin: EdgeInsets.symmetric(vertical: 12.0,horizontal: 18.0),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
         elevation: 5.0,
         shadowColor: bgColor,
@@ -25,13 +26,19 @@ class CustomVehiclesCard extends StatelessWidget {
           decoration: BoxDecoration(
 
           ),
-          width: MediaQuery.of(context).size.width /2.4,
+          width: double.infinity,
           padding: EdgeInsets.symmetric(horizontal: 12.0,vertical: 10.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Image.asset(truckUrl!,width: 50.0),
+             Container(
+               margin: EdgeInsets.symmetric(horizontal: 12.0),
+               height: MediaQuery.of(context).size.height/18,
+               width: 2.0,
+               color: blackColor,
+             ),
               Text(truckName!,style: wheelStyle,)
             ],
           ),

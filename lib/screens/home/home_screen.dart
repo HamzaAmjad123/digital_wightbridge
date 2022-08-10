@@ -37,11 +37,18 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
   int currentSlide = 0;
   GlobalKey<ScaffoldState> key=GlobalKey();
-  oninit()async{
+  initState(){
     super.initState();
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) async =>  usermodels=await Authentication().getUser());
+   getUserDetails();
   }
+  Future<void> getUserDetails()async{
+    usermodels= await Authentication().getUser(
+
+    );
+
+    print(usermodels.userName);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -120,43 +127,39 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          Wrap(
-            alignment: WrapAlignment.center,
-            children: [
-              CustomVehiclesCard(
-                truckName: "New Truck",
-                truckUrl: "assets/images/semi.png",
-                onTap: (){
-                  NavigationServices.goNextAndKeepHistory(context: context, widget: AddTruck());
-                  setState((){});
-                },
-              ),
-              CustomVehiclesCard(
-                truckName: "History",
-                truckUrl: "assets/icons/history.png",
-                onTap: (){
-                  NavigationServices.goNextAndKeepHistory(context: context, widget: History());
-                  setState((){});
-                },
 
-              ),
-              CustomVehiclesCard(
-                truckName: "Truck Limits",
-                truckUrl: "assets/icons/Overloading.png",
-                onTap: (){
-                  NavigationServices.goNextAndKeepHistory(context: context, widget: LoadLimit());
-                  setState((){});
-                },
-              ),
-              CustomVehiclesCard(
-                truckName: "Qr Code",
-                truckUrl: "assets/images/semi.png",
-                onTap: (){
-                  NavigationServices.goNextAndKeepHistory(context: context, widget: QrCode());
-                  setState((){});
-                },
-              ),
-            ],
+          CustomVehiclesCard(
+            truckName: "New Truck",
+            truckUrl: "assets/images/semi.png",
+            onTap: (){
+              NavigationServices.goNextAndKeepHistory(context: context, widget: AddTruck());
+              setState((){});
+            },
+          ),
+          CustomVehiclesCard(
+            truckName: "History",
+            truckUrl: "assets/icons/history.png",
+            onTap: (){
+              NavigationServices.goNextAndKeepHistory(context: context, widget: History());
+              setState((){});
+            },
+
+          ),
+          CustomVehiclesCard(
+            truckName: "Truck Limits",
+            truckUrl: "assets/icons/Overloading.png",
+            onTap: (){
+              NavigationServices.goNextAndKeepHistory(context: context, widget: LoadLimit());
+              setState((){});
+            },
+          ),
+          CustomVehiclesCard(
+            truckName: "Qr Code",
+            truckUrl: "assets/icons/qr_image.png",
+            onTap: (){
+              NavigationServices.goNextAndKeepHistory(context: context, widget: QrCode());
+              setState((){});
+            },
           )
         ],
       ),

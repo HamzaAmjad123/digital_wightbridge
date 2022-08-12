@@ -2,12 +2,13 @@ import 'package:digital_weighbridge/configs/colors.dart';
 import 'package:digital_weighbridge/helper_services/navigation_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import '../helper_services/custom_snacbar.dart';
 import '../screens/Auth/login_screen.dart';
 
 class SignOutConfirmationDialog extends StatelessWidget {
   final bool isSetting;
+  final box = GetStorage();
   SignOutConfirmationDialog({this.isSetting = false});
 
   // final UserRepository _userRepository = UserRepository();
@@ -27,7 +28,9 @@ class SignOutConfirmationDialog extends StatelessWidget {
           Expanded(child: InkWell(
             onTap: () async {
               Navigator.pop(context);
+              await box.remove('user');
               bool res=await _signOut();
+
               if(res){
                 CustomSnackBar.showSnackBar(context: context, message: "LogOut Succesfully");
                 NavigationServices.goNextAndKeepHistory(

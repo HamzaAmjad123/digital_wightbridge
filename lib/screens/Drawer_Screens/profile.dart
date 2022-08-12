@@ -1,19 +1,16 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:digital_weighbridge/configs/colors.dart';
-import 'package:digital_weighbridge/screens/Authentication.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
-import '../helper_services/custom_loader.dart';
-import '../helper_services/custom_snacbar.dart';
-import '../helper_services/navigation_services.dart';
-import '../helper_widgets/custom_button.dart';
-import '../helper_widgets/custom_textfield.dart';
-import '../models/user_model.dart';
-import 'home/home_screen.dart';
+import '../../helper_services/custom_snacbar.dart';
+import '../../helper_widgets/custom_button.dart';
+import '../../helper_widgets/custom_textfield.dart';
+import '../../models/user_model.dart';
+import '../home/home_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -29,12 +26,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   File? imageFile;
   bool uploading = false;
   String imageUrl = "";
-  final _firestore = FirebaseFirestore.instance;
   bool _show = false;
 
   @override
   initState(){
-    print("on in it");
     super.initState();
     getUser();
   }
@@ -44,6 +39,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    TextEditingController nameCont=new TextEditingController();
+    TextEditingController phoneCont=new TextEditingController();
     return Scaffold(
       bottomSheet: _showBottomSheet(),
       body: SingleChildScrollView(
@@ -93,8 +90,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ),
                           ),
-
-
                         ],)
                     ),
 
@@ -112,51 +107,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
                   CustomTextField(
                     headerText: "UserName",
                     hintText: usermodels.userName,
                     inputAction: TextInputAction.next,
                     isSelected: true,
-                    onChange: (value){
-                    },
+                    controller: nameCont,
                   ),
-                  // CustomTextField(
-                  //   headerText: "email",
-                  //   hintText: usermodels.email,
-                  //   inputAction: TextInputAction.next,
-                  // ),
                   CustomTextField(
                     headerText: "PhoneNumber",
                     hintText: usermodels.phoneNumber,
+                    inputType: TextInputType.number,
                     inputAction: TextInputAction.next,
-
                     isSelected: true,
+                    controller: phoneCont,
                   ),
-
                   Text("Email",style: TextStyle(color: Colors.black54,fontSize: 16.0,height: 1.5),),
                   Container(
-
                     margin: EdgeInsets.symmetric(vertical: 10.0),
                     padding: EdgeInsets.symmetric(vertical: 8.0,horizontal: 10.0),
                     height: 45.0,
                     width: double.infinity,
                     decoration: BoxDecoration(
-
                       border: Border.all(color: blackColor),
                         borderRadius: BorderRadius.circular(12.0),),
                     child: Text(
                       usermodels.email!,style: TextStyle(color: blackColor,fontSize: 16.0,fontWeight: FontWeight.w500,),
-
                     ),
                   ),
-                  // Text(usermodels.imgUrl == null ? "Upload Profile Picture" : ImageUrl,
-                  //   style: TextStyle(
-                  //       height: 2.3,
-                  //       color: Colors.black87,
-                  //       fontSize: 16.0,
-                  //       fontWeight: FontWeight.w500),
-                  // ),
                   CustomButton(
                     width: MediaQuery
                         .of(context)
@@ -164,23 +142,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         .width * 0.9,
                     buttonColor: bgColor,
                     fontWeight: FontWeight.bold,
-
                     onTap: () async {
-                      if(imageUrl==""){
-                        CustomSnackBar.failedSnackBar(context: context, message: "No Image Selected");
-                      }else{
                         await updateInfo();
-                        CustomSnackBar.showSnackBar(context: context, message: "Picture Uploaded");
                         Navigator.push(context, MaterialPageRoute(builder: (context)=>HomeScreen()));
-                      }
-
-
                     },
                     text: "Save",
                     fontSize: 18.0,
                     verticalMargin: 15.0,
                   ),
-
                 ],
               ),
             ),
@@ -228,10 +197,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   updateInfo() async {
     FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
-    //var firebaseUser = await FirebaseAuth.instance.currentUser!;
    await firebaseFirestore.collection("users").doc(usermodels.uid).update(
         {
-          "imgUrl" : imageUrl,
+          "userName": usermodels.userName,
+          "imgUrl" : imageUrl==""?usermodels.imgUrl:imageUrl,
         }).then((_){
       print("success!");
     });
@@ -288,5 +257,4 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return Text("");
     }
   }
-
 }

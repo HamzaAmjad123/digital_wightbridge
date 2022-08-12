@@ -4,26 +4,20 @@
  * Author: SmarterVision - https://codecanyon.net/user/smartervision
  * Copyright (c) 2022
  */
-
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:digital_weighbridge/helper_services/custom_snacbar.dart';
-import 'package:digital_weighbridge/screens/Authentication.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:digital_weighbridge/screens/record_checking/load_limit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get_storage/get_storage.dart';
-
 import '../../configs/colors.dart';
 import '../../helper_services/navigation_services.dart';
 import '../../helper_widgets/animated_dialog.dart';
-import '../../helper_widgets/deletion_dialouge.dart';
+import '../../helper_widgets/logout_dialouge.dart';
 import '../../helper_widgets/drawer_widget.dart';
 import '../../models/user_model.dart';
-import '../Auth/login_screen.dart';
-import '../profile.dart';
-import '../qr_code.dart';
+import '../Drawer_Screens/profile.dart';
+import '../qr_and_printer/qr_code.dart';
 import 'home_screen.dart';
 
 class CustomDrawer extends StatefulWidget {
@@ -122,7 +116,15 @@ class _CustomDrawerState extends State<CustomDrawer> {
             setState((){});
           },
         ),
-
+        DrawerLinkWidget(
+          icon: Icons.list,
+          text: "Load Limit",
+          onTap: () async {
+            Navigator.of(context).pop();
+            NavigationServices.goNextAndKeepHistory(context: context, widget: LoadLimit());
+            setState((){});
+          },
+        ),
         DrawerLinkWidget(
           icon: Icons.list,
           text: "All Orders",
@@ -168,7 +170,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
         ListTile(
           dense: true,
           title: Text(
-            "Account & Settings",
+            "Account",
             style: Get.textTheme.caption,
           ),
           trailing: Icon(
@@ -176,13 +178,13 @@ class _CustomDrawerState extends State<CustomDrawer> {
             color: Get.theme.focusColor.withOpacity(0.3),
           ),
         ),
-        DrawerLinkWidget(
-          icon: Icons.settings_outlined,
-          text: "Settings",
-          onTap: () async {
-
-          },
-        ),
+        // DrawerLinkWidget(
+        //   icon: Icons.settings_outlined,
+        //   text: "Settings",
+        //   onTap: () async {
+        //
+        //   },
+        // ),
         DrawerLinkWidget(
           icon: Icons.logout,
           text: "Logout",

@@ -4,6 +4,7 @@
  * Author: SmarterVision - https://codecanyon.net/user/smartervision
  * Copyright (c) 2022
  */
+import 'package:digital_weighbridge/screens/Drawer_Screens/about_us_screen.dart';
 import 'package:digital_weighbridge/screens/record_checking/load_limit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -155,17 +156,18 @@ class _CustomDrawerState extends State<CustomDrawer> {
         DrawerLinkWidget(
           icon: Icons.account_balance_wallet_outlined,
           text: "About Us",
-          onTap: () async {
+          onTap: ()  {
+            NavigationServices.goNextAndKeepHistory(context: context, widget: AboutUsScreen());
 
           },
         ),
-        DrawerLinkWidget(
-          icon: Icons.person_outline,
-          text: "Contact Us",
-          onTap: () async {
-            Get.back();
-          },
-        ),
+        // DrawerLinkWidget(
+        //   icon: Icons.person_outline,
+        //   text: "Contact Us",
+        //   onTap: () async {
+        //     Get.back();
+        //   },
+        // ),
 
         ListTile(
           dense: true,

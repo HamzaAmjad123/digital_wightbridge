@@ -13,7 +13,7 @@ class History extends StatefulWidget {
 }
 
 class _HistoryState extends State<History> {
-  List<Order> orderList = [];
+  List<OrderModel> orderList = [];
 
   @override
   void initState() {
@@ -29,20 +29,22 @@ class _HistoryState extends State<History> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: bgColor,
+        centerTitle: true,
+        title: Text("All Records"),
+      ),
       body: SingleChildScrollView(
-        child: ListView.builder(
-            shrinkWrap: true,
-            primary: false,
-            itemCount: orderList.length,
-            itemBuilder: (context,index){
-              return  Container(
-                height: 200,
-                width: 200,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              );
-            }
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: ListView.builder(
+              shrinkWrap: true,
+              primary: false,
+              itemCount: orderList.length,
+              itemBuilder: (context,index){
+                return  HistoryWidget(order: orderList[index]);
+              }
+          ),
         ),
       ),
     );
@@ -58,7 +60,7 @@ class _HistoryState extends State<History> {
     temp2 = await querySnapshot.docs.map((doc) => doc.id).toList();
     for (int i = 0; i < temp.length; i++) {
       if (temp[i]['status'] == "active") {
-        orderList.add(Order(
+        orderList.add(OrderModel(
             id: temp2[i],
             name: temp[i]["name"],
             noPlate: temp[i]["noPlate"],
@@ -70,5 +72,70 @@ class _HistoryState extends State<History> {
       }
     }
     setState(() {});
+  }
+}
+
+
+class HistoryWidget extends StatefulWidget {
+  OrderModel order;
+   HistoryWidget({required this.order});
+
+  @override
+  State<HistoryWidget> createState() => _HistoryWidgetState();
+}
+
+class _HistoryWidgetState extends State<HistoryWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+
+      margin: EdgeInsets.symmetric(vertical: 12.0),
+      shape: RoundedRectangleBorder(
+        borderRadius:BorderRadius.circular(15.0),
+      ),
+      shadowColor: bgColor,
+      elevation: 10.0,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.0,vertical: 20.0),
+        width: double.infinity,
+        decoration: BoxDecoration(
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ListTile(
+              leading: widget.order.truckType=="4wheeler"?Image.asset("assets/icons/4_wheel.png"):widget.order.truckType=="6wheeler"?Image.asset("assets/icons/6_wheel.png"):widget.order.truckType=="10wheeler"?Image.asset("assets/icons/10_wheel.png"):widget.order.truckType=="12wheeler"?Image.asset("assets/icons/12_wheel.png"):Image.asset(''),
+              title: Text(widget.order.name!,style: TextStyle(color: bgColor,fontSize: 15.0,fontWeight: FontWeight.w600),),
+              subtitle: Text(widget.order.noPlate!),
+              trailing: Container(
+
+                padding: EdgeInsets.symmetric(horizontal: 8.0,vertical: 5.0),
+                  decoration: BoxDecoration(
+                    color: widget.order.status=="active"?Colors.green:bgColor,
+                    borderRadius: BorderRadius.circular(8.0),
+                    border: Border.all(
+                      color: widget.order.status=="active"?Colors.green:bgColor
+                    )
+                  ),
+                  child: Text(widget.order.status!,style: TextStyle(color: widget.order.status=="active"?whiteColor:whiteColor),)),
+            ),
+            Divider(
+              color: bgColor,
+              thickness: 2,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Total Weight: ${widget.order.bridgeWieght!}"),
+                Text("Weight Type: ${widget.order.wighttype}"),
+              ],
+            )
+          ],
+        ),
+
+      ),
+    );
   }
 }

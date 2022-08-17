@@ -20,13 +20,13 @@ class VehicleDetailsScreen extends StatefulWidget {
 
 class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
   TextEditingController nameCont=new TextEditingController();
-  List<Order> order_list=[];
+  List<OrderModel> order_list=[];
   int slectedIndex=-1;
   String selectednoPlate = "Select noPlate";
   String weightType="Select Weight Type";
   List<String> weightTypeList=["Iron","Wood","Plastic","Steel","Copper"];
   List<String> vehicalNoPlate = [];
-  Order order=new Order();
+  OrderModel order=new OrderModel();
 
   @override
   void initState() {
@@ -321,7 +321,7 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
    print(temp2);
     for(int i=0;i<temp.length;i++){
       if(temp[i]['status']=="active"){
-        order_list.add(Order(
+        order_list.add(OrderModel(
           id: temp2[i],
           name: temp[i]["name"],
           noPlate: temp[i]["noPlate"],

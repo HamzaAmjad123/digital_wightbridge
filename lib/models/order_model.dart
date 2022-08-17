@@ -1,4 +1,4 @@
-class Order {
+class OrderModel {
   String? id;
   String? name;
   String? noPlate;
@@ -8,7 +8,7 @@ class Order {
   String? wighttype;
   String? status;
 
-  Order(
+  OrderModel(
       {
         this.id,
         this.name,

@@ -5,7 +5,7 @@ import 'package:esc_pos_utils/esc_pos_utils.dart';
 import 'package:flutter/material.dart';
 
 class PrinterScreen extends StatefulWidget {
-  Order? order;
+  OrderModel? order;
   PrinterScreen({this.order});
 
   @override

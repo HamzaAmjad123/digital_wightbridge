@@ -70,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   centerTitle: true,
                   automaticallyImplyLeading: false,
                   leading: new IconButton(
-                    icon: new Icon(Icons.sort, color: Colors.black87),
+                    icon: new Icon(Icons.sort, color: Colors.orange),
                     onPressed: () => {
                       key.currentState!.openDrawer()},
                   ),
@@ -125,39 +125,41 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
+            Container(
+              child: Column(children: [
+                CustomVehiclesCard(
+                  truckName: "New Truck",
+                  truckUrl: "assets/images/semi.png",
+                  onTap: (){
+                    NavigationServices.goNextAndKeepHistory(context: context, widget: SelectWheeler());
+                    setState((){});
+                  },
+                ),
+                CustomVehiclesCard(
+                  truckName: "History",
+                  truckUrl: "assets/icons/history.png",
+                  onTap: (){
+                    NavigationServices.goNextAndKeepHistory(context: context, widget: History());
+                    setState((){});
+                  },
 
-
-            CustomVehiclesCard(
-              truckName: "New Truck",
-              truckUrl: "assets/images/semi.png",
-              onTap: (){
-                NavigationServices.goNextAndKeepHistory(context: context, widget: SelectWheeler());
-                setState((){});
-              },
-            ),
-            CustomVehiclesCard(
-              truckName: "History",
-              truckUrl: "assets/icons/history.png",
-              onTap: (){
-                NavigationServices.goNextAndKeepHistory(context: context, widget: History());
-                setState((){});
-              },
-
-            ),
-            CustomVehiclesCard(
-              truckName: "Truck Limits",
-              truckUrl: "assets/icons/Overloading.png",
-              onTap: (){
-                NavigationServices.goNextAndKeepHistory(context: context, widget: LoadLimit());
-                setState((){});
-              },
-            ),
-            CustomVehiclesCard(
-              truckName: "Qr Code",
-              truckUrl: "assets/icons/qr_image.png",
-              onTap: ()async{
-                await permissionServiceCall();
-              },
+                ),
+                CustomVehiclesCard(
+                  truckName: "Truck Limits",
+                  truckUrl: "assets/icons/Overloading.png",
+                  onTap: (){
+                    NavigationServices.goNextAndKeepHistory(context: context, widget: LoadLimit());
+                    setState((){});
+                  },
+                ),
+                CustomVehiclesCard(
+                  truckName: "Qr Code",
+                  truckUrl: "assets/icons/qr_image.png",
+                  onTap: ()async{
+                    await permissionServiceCall();
+                  },
+                )
+              ],),
             )
           ],
         ),

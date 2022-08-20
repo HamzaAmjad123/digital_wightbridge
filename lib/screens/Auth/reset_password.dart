@@ -19,7 +19,6 @@ class ResetPassword extends StatefulWidget {
 class _ResetPasswordState extends State<ResetPassword> {
   final _formkey = GlobalKey<FormState>();
   TextEditingController? _resetemail=TextEditingController();
-  TextEditingController? _check=TextEditingController();
   bool _validate = false;
   final FirebaseAuth _firebaseAuth=FirebaseAuth.instance;
   @override
@@ -170,6 +169,4 @@ class _ResetPasswordState extends State<ResetPassword> {
     }
   }
 
-  void checkvalue(String? check) {
-  }
 }

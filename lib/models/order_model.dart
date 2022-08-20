@@ -19,11 +19,10 @@ class OrderModel {
         this.vehicleWeight,
         this.wighttype});
 
-  // Order.fromJson(Map<String, dynamic> json) {
+  // OrderModel.fromJson(Map<String, dynamic> json) {
   //   name = json['name'];
   //   noPlate = json['noPlate'];
   //   truckType = json['truckType'];
-  //   totalWieght = json['TotalWieght'];
   //   vehicleWeight = json['vehicleWeight'];
   // }
   //
@@ -32,7 +31,6 @@ class OrderModel {
   //   data['name'] = this.name;
   //   data['noPlate'] = this.noPlate;
   //   data['truckType'] = this.truckType;
-  //   data['TotalWieght'] = this.totalWieght;
   //   data['vehicleWeight'] = this.vehicleWeight;
   //   return data;
   // }

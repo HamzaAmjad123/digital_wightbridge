@@ -111,7 +111,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
         ),
 
         DrawerLinkWidget(
-          icon: Icons.folder_special_outlined,
+          icon: Icons.person_sharp,
           text: "Profile",
           onTap: () {
             Navigator.of(context).pop();
@@ -120,7 +120,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
           },
         ),
         DrawerLinkWidget(
-          icon: Icons.list,
+          icon: Icons.warning,
           text: "Load Limit",
           onTap: () async {
             Navigator.of(context).pop();

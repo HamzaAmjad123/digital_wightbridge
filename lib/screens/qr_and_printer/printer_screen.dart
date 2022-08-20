@@ -1,11 +1,15 @@
-
 import 'package:bluetooth_thermal_printer/bluetooth_thermal_printer.dart';
+import 'package:digital_weighbridge/helper_services/navigation_services.dart';
 import 'package:digital_weighbridge/models/order_model.dart';
+import 'package:digital_weighbridge/screens/home/home_screen.dart';
 import 'package:esc_pos_utils/esc_pos_utils.dart';
 import 'package:flutter/material.dart';
 
+import '../../configs/colors.dart';
+
 class PrinterScreen extends StatefulWidget {
   OrderModel? order;
+
   PrinterScreen({this.order});
 
   @override
@@ -15,18 +19,69 @@ class PrinterScreen extends StatefulWidget {
 class _PrinterScreenState extends State<PrinterScreen> {
   bool connected = false;
   List availableBluetoothDevices = [];
-  List<int>? bytes=[];
-  int connected_index=-1;
+  List<int>? bytes = [];
+  int connected_index = -1;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) =>
+        getBluetooths(),
+    );
+    setState(() {});
+  }
+
+  Future getBluetooths()async{
+    await getBluetooth();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Printer screen"),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-
+    return WillPopScope(
+      onWillPop: ()async{
+        NavigationServices.goNextAndDoNotKeepHistory(
+            context: context, widget: HomeScreen());
+        return true;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: bgColor,
+          title: Text(
+            "Printer Screen",
+            style: TextStyle(color: Colors.white,fontSize: 18),
+          ),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              NavigationServices.goNextAndDoNotKeepHistory(
+                  context: context, widget: HomeScreen());
+            },
+          ),
         ),
+        body: Container(
+          child: Center(
+            child: Text( "No Bluetooth Printer Connect",
+         style: TextStyle(color: bgColor, fontSize: 18),)
+          ),
+          // child: availableBluetoothDevices == 0
+          //     ? Center(
+          //   child: Text(
+          //     "No Bluetooth Device Connect",
+          //     style: TextStyle(color: bgColor, fontSize: 18),
+          //   ),
+          // )
+          //     : ListView.builder(
+          //     shrinkWrap: true,
+          //     primary: false,
+          //     itemCount: availableBluetoothDevices.length,
+          //     itemBuilder: (context,index){
+          //       return ListTile(
+          //         leading: Icon(Icons.bluetooth,color: bgColor,),
+          //         title: Text(availableBluetoothDevices[index]),
+          //       );
+          //     }),
+        )
       ),
     );
   }
@@ -41,21 +96,21 @@ class _PrinterScreenState extends State<PrinterScreen> {
     print(availableBluetoothDevices.length);
   }
 
-  Future<void> setConnect(String mac,int x) async{
+  Future<void> setConnect(String mac, int x) async {
     final String? result = await BluetoothThermalPrinter.connect(mac);
     if (result == "true") {
-      connected_index=x;
+      connected_index = x;
       connected = true;
       setState(() {});
     }
   }
-
 
   Future<void> printTicket() async {
     String? isConnected = await BluetoothThermalPrinter.connectionStatus;
     if (isConnected == "true") {
       List<int> bytes = await getTicket();
       final result = await BluetoothThermalPrinter.writeBytes(bytes);
+      setState(() {});
     } else {
       //Hadnle Not Connected Senario
     }
@@ -79,7 +134,8 @@ class _PrinterScreenState extends State<PrinterScreen> {
     final generator = Generator(PaperSize.mm80, profile);
 
     // Print QR Code using native function
-    bytes += generator.qrcode('Weight: 2500 kg,Total Wieght: 2000.com',size: QRSize(12));
+    bytes += generator.qrcode('Weight: 2500 kg,Total Wieght: 2000.com',
+        size: QRSize(12));
 
     bytes += generator.hr();
 
@@ -97,31 +153,37 @@ class _PrinterScreenState extends State<PrinterScreen> {
     CapabilityProfile profile = await CapabilityProfile.load();
     final generator = Generator(PaperSize.mm80, profile);
 
-    bytes += generator.text("WightBridge",
+    bytes += generator.text(
+      "WightBridge",
+      styles: PosStyles(
+        align: PosAlign.center,
+        height: PosTextSize.size2,
+        width: PosTextSize.size2,
+      ), /*linesAfter: 1*/
+    );
+
+    bytes += generator.text("Lahore Garrison Universty, Lahore",
+        styles: PosStyles(align: PosAlign.center));
+    bytes += generator.text('Fyp}',
+        styles: PosStyles(
+            align: PosAlign.left,
+            height: PosTextSize.size1,
+            width: PosTextSize.size2));
+    bytes += generator.text('',
+        styles: PosStyles(
+            align: PosAlign.left,
+            height: PosTextSize.size1,
+            width: PosTextSize.size2));
+    bytes += generator.hr(ch: '=', len: 32, linesAfter: 0);
+    bytes += generator.text(
+      "For Kitchen",
       styles: PosStyles(
         align: PosAlign.center,
         height: PosTextSize.size2,
         width: PosTextSize.size2,
       ),
-      /*linesAfter: 1*/);
-
-    bytes += generator.text(
-        "18th Main Road, New Super Town, Lahore",
-        styles: PosStyles(align: PosAlign.center));
-    bytes += generator.text('Tel: +042111111113',
-        styles: PosStyles(align: PosAlign.center));
-    bytes += generator.text('OrderId:}',
-        styles: PosStyles(align: PosAlign.left,height: PosTextSize.size1,width:PosTextSize.size2 ));
-    bytes += generator.text('Vehical No:}',
-        styles: PosStyles(align: PosAlign.left,height: PosTextSize.size1,width:PosTextSize.size2 ));
-    bytes += generator.hr(ch: '=',len: 32, linesAfter: 0);
-    bytes += generator.text("For Kitchen",
-      styles: PosStyles(
-        align: PosAlign.center,
-        height: PosTextSize.size2,
-        width: PosTextSize.size2,
-      ),);
-    bytes += generator.hr(ch: '=',len: 32, linesAfter: 0);
+    );
+    bytes += generator.hr(ch: '=', len: 32, linesAfter: 0);
     bytes += generator.row([
       PosColumn(
           text: 'name',
@@ -195,7 +257,4 @@ class _PrinterScreenState extends State<PrinterScreen> {
     print(bytes);
     return bytes;
   }
-
-
-
 }

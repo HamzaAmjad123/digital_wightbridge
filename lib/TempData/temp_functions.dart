@@ -87,3 +87,10 @@
 //  orders_list = await querySnapshot.docs.map((doc) => doc.data()).toList();
 //   /*return users_list.toList();*/
 // }
+
+
+
+
+// Future<bool> userExists(String username) async =>
+//     (await FirebaseFirestore.instance.collection("4Wheeler").where("noPlate", isEqualTo: username).get()
+//         .then((value) => value.size > 0 ? true : false));

@@ -27,10 +27,9 @@ class _LoadLimitState extends State<LoadLimit> {
     "10Wheeler",
     "12Wheeler"
   ];
-  String slecetdTruck = "Select Weight Type";
+  String slecetdTruck = "Select your vehicle";
   List<String> truckList = [];
   List<String> vehicalLoadLimit = [];
-  List<String> vehicalNoPlate = [];
   int? slectedIndex;
   TextEditingController weightCont = new TextEditingController();
 
@@ -139,6 +138,8 @@ class _LoadLimitState extends State<LoadLimit> {
                     );
                   }).toList(),
                   onChanged: (String? value) {
+                    truckList.clear();
+                    vehicalLoadLimit.clear();
                     selectedvehical = value!;
                     CustomLoader.showLoader(context: context);
                     getData(selectedvehical);
@@ -215,17 +216,16 @@ class _LoadLimitState extends State<LoadLimit> {
   }
 
   Future getData(String collection) async {
-    List orders_list = [];
+    List trucks_list = [];
     CollectionReference _collectionRef =
         FirebaseFirestore.instance.collection(collection);
     // Get docs from collection reference
     QuerySnapshot querySnapshot = await _collectionRef.get();
     // Get data from docs and convert map to List
-    orders_list = await querySnapshot.docs.map((doc) => doc.data()).toList();
-    for(int i=0;i<orders_list.length;i++){
-      truckList.add(orders_list[i]['name']+" "+orders_list[i]['noPlate']);
-      vehicalLoadLimit.add(orders_list[i]['Load Limit']);
-      vehicalNoPlate.add(orders_list[i]['noPlate']);
+    trucks_list = await querySnapshot.docs.map((doc) => doc.data()).toList();
+    for(int i=0;i<trucks_list.length;i++){
+      truckList.add(trucks_list[i]['name']);
+      vehicalLoadLimit.add(trucks_list[i]['totalCapacity']);
     }
     setState(() {});
     /*return users_list.toList();*/
@@ -239,12 +239,11 @@ class _LoadLimitState extends State<LoadLimit> {
     int weight=int.parse(load);
     int capacity=int.parse(vehicalLoadLimit[slectedIndex!]);
     if(weight<capacity){
+      print(capacity);
       CustomSnackBar.showSnackBar(context: context, message: "This Vehical is suitable for you");
     }else{
+      print(capacity);
       CustomSnackBar.failedSnackBar(context: context, message: "Your load is maximum then Vehical Capcity");
     }
   }
-  // Future<bool> userExists(String username) async =>
-  //     (await FirebaseFirestore.instance.collection("4Wheeler").where("noPlate", isEqualTo: username).get()
-  //         .then((value) => value.size > 0 ? true : false));
 }

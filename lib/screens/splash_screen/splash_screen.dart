@@ -19,7 +19,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     // TODO: implement initState
 
-    Timer(Duration(seconds: 3), () =>
+    Timer(Duration(seconds:5), () =>
     NavigationServices.goNextAndDoNotKeepHistory(context: context, widget: LoginScreen())
     );
     setState((){});
@@ -29,9 +29,11 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: whiteColor,
-      body: Center(
-        child: Image.asset("assets/images/splash_image.gif"),
+      body: Container(
+        height: double.infinity,
+        width: MediaQuery.of(context).size.width,
+        child: Image.asset("assets/images/LOGO.gif"),
+        // child: Image.asset("assets/images/splash_image.gif"),
       ),
     );
   }

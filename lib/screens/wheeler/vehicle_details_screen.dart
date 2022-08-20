@@ -1,8 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:digital_weighbridge/configs/colors.dart';
 import 'package:digital_weighbridge/configs/text_styles.dart';
+import 'package:digital_weighbridge/helper_services/navigation_services.dart';
 import 'package:digital_weighbridge/helper_widgets/custom_button.dart';
 import 'package:digital_weighbridge/helper_widgets/custom_textfield.dart';
+import 'package:digital_weighbridge/screens/qr_and_printer/printer_screen.dart';
+import 'package:digital_weighbridge/screens/wheeler/add_vehicle.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import '../../helper_services/custom_loader.dart';
@@ -32,9 +35,10 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
   List<String> vehicalNameList = [];
   TruckModel truck=new TruckModel();
   //for save order
-  OrderModel order=new OrderModel();
-  FirebaseDatabase database=FirebaseDatabase.instance;
+
   final database2=FirebaseDatabase.instance.reference();
+
+  String? loadOnVehicle;
 
   @override
   void initState() {
@@ -77,7 +81,8 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
               children: [
                 Align(alignment: Alignment.topRight,
                     child: GestureDetector(
-                      onTap: ()async{
+                      onTap: (){
+                        NavigationServices.goNextAndKeepHistory(context: context, widget: AddNewVehicle());
                       },
                       child: Container(
                         margin: EdgeInsets.only(top: 20),
@@ -154,9 +159,6 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
                               }).toList(),
                               onChanged: (String? value) {
                                 selectedTruck = value!;
-                                CustomLoader.showLoader(context: context);
-                                getVehicalWieght(selectedTruck);
-                                CustomLoader.hideLoader(context);
                                 setState(() {});
                               }),
                         ),
@@ -264,7 +266,7 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
                                 bottom: BorderSide(width: 2.0, color: bgColor),
                               ),
                             ),
-                            child: Text(slectedIndex<0?
+                            child: Text(loadOnVehicle==null?
                             "Product Weight":"${getWeight()}"+"kg",
                               style: TextStyle(
                                   height: 2.3,
@@ -282,6 +284,22 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
                                 verticalMargin: 15.0,
                                 text: "Get Data",
                                 onTap: ()async{
+                               if(selectedTruck=="Select Vehical")
+                               {
+                                 CustomSnackBar.failedSnackBar(context: context, message: "Select Vehical First");
+                               }
+                               else{
+                                 if(nameCont.text.isEmpty){
+                                   CustomSnackBar.failedSnackBar(context: context, message: "Enter Name first!!");
+                                 }
+                                 else if(nameCont.text.length<3){
+                                   CustomSnackBar.failedSnackBar(context: context, message: "Enter Valid Name!!");
+                                 }else{
+                                   await activateListner();
+                                   await getVehicalWieght(selectedTruck);
+                                   setState(() {});
+                                 }
+                               }
                                 },
                               ),
                             ), Expanded(
@@ -289,6 +307,26 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
                                 verticalMargin: 15.0,
                                 text: "Save Records",
                                 onTap: ()async{
+                               if(selectedWeightType=="Select Weight Type"){
+                                 CustomSnackBar.failedSnackBar(context: context, message: "Select Weight type");
+                               }else{
+                                 OrderModel order=new OrderModel(
+                                   id: "",
+                                   name: nameCont.text,
+                                   vehicleName: selectedTruck,
+                                   vehcileType: widget.vehicalType,
+                                   totalWieght: loadOnVehicle,
+                                   vehicleWeight: truck.vehicleWeight,
+                                   productWeight: getWeight().toString(),
+                                   weightType: selectedWeightType,
+                                 );
+                                 bool res=await addRecord(order);
+                                if(res){
+                                  NavigationServices.goNextAndDoNotKeepHistory(context: context, widget: PrinterScreen(order: order,));
+                                }else{
+                                  CustomSnackBar.failedSnackBar(context: context, message: "Save Record Again");
+                                }
+                               }
 
                                 },
                               ),
@@ -345,31 +383,40 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
       CustomSnackBar.failedSnackBar(context: context, message: "there is no record");
     }
   }
+
   getWeight() {
-    int vehicleload=int.parse(truck.vehicleWeight!);
-    print(vehicleload);
-    return 20000-vehicleload;
+    double vehicleWeight=double.parse(truck.vehicleWeight!);
+    double load=double.parse(loadOnVehicle!);
+    return load-vehicleWeight;
   }
 
   activateListner() async{
     CustomLoader.showLoader(context: context);
     await database2.child("Total_Weight").onValue.listen((event) {
-      final Object? totalWeight=event.snapshot.value;
-      print("total Wight");
-      print(totalWeight);
-      setState(() {
-      });
+      final Object? temp=event.snapshot.value;
+      loadOnVehicle=temp.toString();
+      setState(() {});
     });
-    // await database2.child("Product_Weight").onValue.listen((event) {
-    //   final Object? productWeight=event.snapshot.value;
-    //   print("productWeight");
-    //   print(productWeight);
-    //   setState(() {
-    //   });
-    // });
-    // CustomLoader.hideLoader(context);
+     CustomLoader.hideLoader(context);
   }
 
+  Future<bool> addRecord(OrderModel order) {
+    CollectionReference vehical = FirebaseFirestore.instance.collection("records");
+    // Calling the collection to add a new user
+    return vehical
+    //adding to firebase collection
+        .add({
+      "name": nameCont.text,
+      'vehicleName': selectedTruck,
+     ' vehcileType': widget.vehicalType,
+      'totalWieght': loadOnVehicle,
+      'vehicleWeight': truck.vehicleWeight,
+      'productWeight': getWeight().toString(),
+     ' weightType': selectedWeightType,
+    })
+        .then((value) => true)
+        .catchError((error) => false);
+  }
  
 
 }

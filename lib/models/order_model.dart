@@ -1,23 +1,22 @@
-class OrderModel {
-  String? id;
+class OrderModel {String? id;
   String? name;
-  String? noPlate;
-  String? truckType;
   String? vehicleWeight;
-  String? bridgeWieght;
-  String? wighttype;
-  String? status;
+  String? totalWieght;
+  String? weightType;
+  String? vehcileType;
+  String? vehicleName;
+  String? productWeight;
 
   OrderModel(
       {
         this.id,
         this.name,
-        this.noPlate,
-        this.truckType,
-        this.status,
-        this.bridgeWieght,
+        this.vehicleName,
+        this.vehcileType,
+        this.totalWieght,
         this.vehicleWeight,
-        this.wighttype});
+        this.productWeight,
+        this.weightType});
 
   // OrderModel.fromJson(Map<String, dynamic> json) {
   //   name = json['name'];

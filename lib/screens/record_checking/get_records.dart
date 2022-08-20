@@ -88,7 +88,6 @@ class _HistoryWidgetState extends State<HistoryWidget> {
   @override
   Widget build(BuildContext context) {
     return Card(
-
       margin: EdgeInsets.symmetric(vertical: 12.0),
       shape: RoundedRectangleBorder(
         borderRadius:BorderRadius.circular(15.0),

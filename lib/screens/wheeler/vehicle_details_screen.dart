@@ -3,13 +3,13 @@ import 'package:digital_weighbridge/configs/colors.dart';
 import 'package:digital_weighbridge/configs/text_styles.dart';
 import 'package:digital_weighbridge/helper_widgets/custom_button.dart';
 import 'package:digital_weighbridge/helper_widgets/custom_textfield.dart';
-import 'package:digital_weighbridge/screens/qr_and_printer/printer_screen.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-
 import '../../helper_services/custom_loader.dart';
 import '../../helper_services/custom_snacbar.dart';
-import '../../helper_services/navigation_services.dart';
 import '../../models/order_model.dart';
+import '../../models/truck_model.dart';
+
 class VehicleDetailsScreen extends StatefulWidget {
   final  String? vehicalType;
   VehicleDetailsScreen({this.vehicalType});
@@ -19,27 +19,48 @@ class VehicleDetailsScreen extends StatefulWidget {
 }
 
 class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
+  //basic details
   TextEditingController nameCont=new TextEditingController();
-  List<OrderModel> order_list=[];
-  int slectedIndex=-1;
-  String selectednoPlate = "Select noPlate";
-  String weightType="Select Weight Type";
+  String selectedWeightType="Select Weight Type";
   List<String> weightTypeList=["Iron","Wood","Plastic","Steel","Copper"];
-  List<String> vehicalNoPlate = [];
+  // need to evaluate again
+  int slectedIndex=-1;
+  //for slection truck
+  List<TruckModel> truck_list=[];
+  String selectedTruck = "Select Vehical";
+  int? vehicalWeight;
+  List<String> vehicalNameList = [];
+  TruckModel truck=new TruckModel();
+  //for save order
   OrderModel order=new OrderModel();
+  FirebaseDatabase database=FirebaseDatabase.instance;
+  final database2=FirebaseDatabase.instance.reference();
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance
-        .addPostFrameCallback((_) =>  getData());
+        .addPostFrameCallback((_) => 
+        getData(),
+    );
   }
+
   Future getData()async{
-    await getVehicels("orders");
+    await getVehicels(widget.vehicalType!);
   }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: AppBar(
+          backgroundColor: bgColor,
+          centerTitle: true,
+          title: Text("Wheeler Information",style :TextStyle(color: Colors.white,fontSize: 14)),
+          leading: IconButton(
+            icon: new Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => {
+            Navigator.pop(context),
+          }),
+        ),
         body: SingleChildScrollView(
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 18.0),
@@ -51,10 +72,32 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
                   fit: BoxFit.cover),
             ),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Align(alignment: Alignment.topRight,
+                    child: GestureDetector(
+                      onTap: ()async{
+                      },
+                      child: Container(
+                        margin: EdgeInsets.only(top: 20),
+                        height: 35,
+                         width: 150,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                          Icon(Icons.add,color: bgColor,),
+                          Text("Add New Truck",style: TextStyle(color: bgColor),)
+                        ],),
+                      ),
+                    )),
                 Card(
+                  margin: EdgeInsets.only(top: MediaQuery.of(context).size.height/9),
                   elevation: 4.0,
                   color: whiteColor,
                   shadowColor: bgColor,
@@ -74,6 +117,13 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
                           inputAction: TextInputAction.next,
                           controller: nameCont,
                         ),
+                        Text("Select Vehical",
+                          style: TextStyle(
+                              height: 2.3,
+                              color: Colors.black,
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w600),
+                        ),
                         Container(
                           padding: EdgeInsets.symmetric(horizontal: 3.0),
                           height: 45.0,
@@ -88,8 +138,8 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
                                   fontWeight: FontWeight.w500),
                               isExpanded: true,
                               underline: SizedBox(),
-                              hint: Text(selectednoPlate),
-                              items: vehicalNoPlate.map((item) {
+                              hint: Text(selectedTruck),
+                              items: vehicalNameList.map((item) {
                                 return DropdownMenuItem(
                                   child: Text(
                                     item,
@@ -103,9 +153,9 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
                                 );
                               }).toList(),
                               onChanged: (String? value) {
-                                selectednoPlate = value!;
+                                selectedTruck = value!;
                                 CustomLoader.showLoader(context: context);
-                                getOrderDetails(selectednoPlate);
+                                getVehicalWieght(selectedTruck);
                                 CustomLoader.hideLoader(context);
                                 setState(() {});
                               }),
@@ -139,27 +189,6 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
                                     fontSize: 16.0,
                                     fontWeight: FontWeight.w600),
                               ),
-                              RichText(
-                                text: TextSpan(
-                                    text: slectedIndex<0?
-                                    "Weight Type:":"Weight type:"+" ",
-                                    style: TextStyle(
-                                        color: Colors.black,
-                                        height: 2.3,
-                                        fontSize: 16.0,
-                                        fontWeight: FontWeight.w600),
-                                    children: [
-                                      TextSpan(
-                                          text: slectedIndex<0?"wood":order.wighttype!,
-                                          style: TextStyle(
-                                            color: bgColor,
-                                            height: 2.3,
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                    ]),
-                              ),
                             ],
                           ),
                         ),
@@ -178,7 +207,7 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
                                     ),
                                   ),
                                   child: Text(slectedIndex<0?
-                                  "0000kg":order.bridgeWieght!+"kg",
+                                  "0000kg":"14000"+"kg",
                                     style: TextStyle(
                                         height: 2.3,
                                         color: Colors.black87,
@@ -203,7 +232,7 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
                                         fontWeight: FontWeight.w500),
                                     isExpanded: true,
                                     underline: SizedBox(),
-                                    hint: Text(weightType),
+                                    hint: Text(selectedWeightType),
                                     items: weightTypeList.map((item) {
                                       return DropdownMenuItem(
                                         child: Text(
@@ -218,7 +247,7 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
                                       );
                                     }).toList(),
                                     onChanged: (String? value) {
-                                      weightType = value!;
+                                      selectedWeightType = value!;
                                       setState(() {});
                                     }),
                               ),
@@ -236,7 +265,7 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
                               ),
                             ),
                             child: Text(slectedIndex<0?
-                            "Product Weight":getWeight()+"kg",
+                            "Product Weight":"${getWeight()}"+"kg",
                               style: TextStyle(
                                   height: 2.3,
                                   color: Colors.black87,
@@ -251,20 +280,15 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
                             Expanded(
                               child: CustomButton(
                                 verticalMargin: 15.0,
-                                text: "Submit",
+                                text: "Get Data",
                                 onTap: ()async{
                                 },
                               ),
                             ), Expanded(
                               child: CustomButton(
                                 verticalMargin: 15.0,
-                                text: "Print",
+                                text: "Save Records",
                                 onTap: ()async{
-                                bool res=  await changeStatus(order.id!);
-                                  if(res){
-                                    NavigationServices.goNextAndKeepHistory(context: context, widget: PrinterScreen(order: order));
-                                    setState((){});
-                                  }
 
                                 },
                               ),
@@ -280,30 +304,6 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
           ),
         ));
   }
-  // Future<void> addVehical() {
-  //   CollectionReference vehical = FirebaseFirestore.instance.collection("orders");
-  //   // Calling the collection to add a new user
-  //   return vehical
-  //   //adding to firebase collection
-  //       .add({
-  //
-  //     //Data added in the form of a dictionary into the document.
-  //     'name':'Pick Up',
-  //     'noPlate':'ABC1111',
-  //     'truckType':"4wheeler",
-  //     'bridge wieght':"1800",
-  //     "status":"active",
-  //     "wighet type":"cooper",
-  //     'vehicleWeight':"300",
-  //   })
-  //
-  //       .then((value) => print("Order Added Succesfully"))
-  //       .catchError((error) => print("Order couldn't be added."));
-  // }
-
-
-
-
 
   Future getVehicels(String collection) async {
     List temp= [];
@@ -313,72 +313,63 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
     // Get docs from collection reference
     QuerySnapshot querySnapshot = await _collectionRef.get();
     // Get data from docs and convert map to List
-    // temp = await querySnapshot.docs.map((doc){
-    //   print(doc.id);
-    //   doc.data();}).toList();
-   temp=await querySnapshot.docs.map((doc) => doc.data()).toList();
-   temp2=await querySnapshot.docs.map((doc) => doc.id).toList();
-   print(temp2);
+    temp=await querySnapshot.docs.map((doc) => doc.data()).toList();
+    temp2=await querySnapshot.docs.map((doc) => doc.id).toList();
+    print(temp);
     for(int i=0;i<temp.length;i++){
-      if(temp[i]['status']=="active"){
-        order_list.add(OrderModel(
-          id: temp2[i],
-          name: temp[i]["name"],
-          noPlate: temp[i]["noPlate"],
-          truckType: temp[i]["truckType"],
-          status: temp[i]["status"],
-          bridgeWieght: temp[i]["bridge wieght"],
-          vehicleWeight: temp[i]["vehicleWeight"],
-          wighttype: temp[i]["wighet type"]
-        ));
-        vehicalNoPlate.add(temp[i]['noPlate']);
-      }
+      truck_list.add(TruckModel(
+        name: temp[i]["name"],
+        vehicleWeight: temp[i]["vehicleWeight"],
+        id: temp2[i],
+        totalCapacity: temp[i]["totalCapacity"]
+      ));
+      vehicalNameList.add(temp[i]['name']);
+
     }
     setState(() {});
+    print(vehicalNameList);
   }
 
-  void getOrderDetails(String selectednoPlate) {
-    print(selectednoPlate);
-    print(order_list);
-    for(int i=0;i<order_list.length;i++){
-      if(selectednoPlate==order_list[i].noPlate){
+  getVehicalWieght(String selectedTruck) {
+    print(selectedTruck);
+    for(int i=0;i<truck_list.length;i++){
+      if(selectedTruck==truck_list[i].name){
         slectedIndex=i;
       }
     }
     if(slectedIndex>=0){
-     order=order_list[slectedIndex];
-     setState(() {});
+      truck=truck_list[slectedIndex];
+      setState(() {});
+      CustomSnackBar.showSnackBar(context: context, message: "${truck.vehicleWeight}");
     }else{
       CustomSnackBar.failedSnackBar(context: context, message: "there is no record");
     }
   }
-
   getWeight() {
-    return "12000";
+    int vehicleload=int.parse(truck.vehicleWeight!);
+    print(vehicleload);
+    return 20000-vehicleload;
   }
 
-  Future<bool> changeStatus(String id)async {
-    print(id);
-    print(id);
-    FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
-    await firebaseFirestore.collection("orders")
-        .doc(id)
-        .update({
-      "status": "complete",
+  activateListner() async{
+    CustomLoader.showLoader(context: context);
+    await database2.child("Total_Weight").onValue.listen((event) {
+      final Object? totalWeight=event.snapshot.value;
+      print("total Wight");
+      print(totalWeight);
+      setState(() {
+      });
     });
-    return true;
+    // await database2.child("Product_Weight").onValue.listen((event) {
+    //   final Object? productWeight=event.snapshot.value;
+    //   print("productWeight");
+    //   print(productWeight);
+    //   setState(() {
+    //   });
+    // });
+    // CustomLoader.hideLoader(context);
   }
 
+ 
 
-
-// Future getData(String collection) async {
-//   List orders_list= [];
-//   CollectionReference _collectionRef =
-//   FirebaseFirestore.instance.collection(collection);
-//   // Get docs from collection reference
-//   QuerySnapshot querySnapshot = await _collectionRef.get();
-//   // Get data from docs and convert map to List
-//  orders_list = await querySnapshot.docs.map((doc) => doc.data()).toList();
-//   /*return users_list.toList();*/
-// }
 }

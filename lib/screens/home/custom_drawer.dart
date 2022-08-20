@@ -11,7 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../configs/colors.dart';
+import '../../helper_services/custom_snacbar.dart';
 import '../../helper_services/navigation_services.dart';
 import '../../helper_widgets/animated_dialog.dart';
 import '../../helper_widgets/logout_dialouge.dart';
@@ -138,7 +140,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
           text: "Qr Code",
           onTap: () async {
             Navigator.of(context).pop();
-            NavigationServices.goNextAndKeepHistory(context: context, widget: QrCode());
+            await permissionServiceCall();
             setState((){});
           },
         ),
@@ -196,6 +198,51 @@ class _CustomDrawerState extends State<CustomDrawer> {
           },
         ),
       ]),
+    );
+  }
+  Future<Map<Permission, PermissionStatus>> permissionServices() async {
+    // You can request multiple permissions at once.
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.camera,
+      //add more permission to request here.
+    ].request();
+
+    if (statuses[Permission.camera]!.isPermanentlyDenied) {
+      CustomSnackBar.failedSnackBar(context: context, message: "Qr COde need Camera Permisions so Please enable camre Ist");
+
+      await openAppSettings().then(
+            (value) async {
+          if (value) {
+            if (await Permission.camera.status.isPermanentlyDenied == true &&
+                await Permission.camera.status.isGranted == false) {
+              openAppSettings();
+              // permissionServiceCall(); /* opens app settings until permission is granted */
+            }
+          }
+        },
+      );
+      openAppSettings();
+      //setState(() {});
+    } else {
+      if (statuses[Permission.camera]!.isDenied) {
+        permissionServiceCall();
+      }
+    }
+    /*{Permission.camera: PermissionStatus.granted, Permission.storage: PermissionStatus.granted}*/
+    return statuses;
+  }
+  permissionServiceCall() async {
+    await permissionServices().then(
+          (value) {
+        if (value != null) {
+          if (
+          value[Permission.camera]!.isGranted){
+            /* ========= New Screen Added  ============= */
+            NavigationServices.goNextAndKeepHistory(context: context, widget: QrCode());
+            setState((){});
+          }
+        }
+      },
     );
   }
 

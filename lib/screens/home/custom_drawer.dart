@@ -5,6 +5,8 @@
  * Copyright (c) 2022
  */
 import 'package:digital_weighbridge/screens/Drawer_Screens/about_us_screen.dart';
+import 'package:digital_weighbridge/screens/qr_and_printer/printer_screen.dart';
+import 'package:digital_weighbridge/screens/record_checking/get_records.dart';
 import 'package:digital_weighbridge/screens/record_checking/load_limit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -74,27 +76,6 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   "assets/images/profile_picture.png", fit: BoxFit
                     .cover,) : Image.network(usermodels.imgUrl!,fit: BoxFit.cover,),
               ),
-              // SizedBox(
-              //   width: 80,
-              //   height: 80,
-              //   child: ClipRRect(
-              //     borderRadius: BorderRadius.all(Radius.circular(80)),
-              //     child: CachedNetworkImage(
-              //       height: 80,
-              //       width: double.infinity,
-              //       fit: BoxFit.cover,
-              //       imageUrl: "https://picsum.photos/250?image=9",
-              //       placeholder: (context, url) => Image.asset(
-              //         "assets/images/place_holder.png",
-              //         fit: BoxFit.cover,
-              //         width: double.infinity,
-              //         height: 80,
-              //       ),
-              //       errorWidget: (context, url, error) =>
-              //           Icon(Icons.error_outline),
-              //     ),
-              //   ),
-              // ),
             ],
           ),
         ),
@@ -132,7 +113,10 @@ class _CustomDrawerState extends State<CustomDrawer> {
           icon: Icons.list,
           text: "All Orders",
           onTap: () async {
-            Get.back();
+            Navigator.of(context).pop();
+            NavigationServices.goNextAndKeepHistory(context: context, widget: History());
+            setState(() {
+            });
           },
         ),
         DrawerLinkWidget(
@@ -160,16 +144,10 @@ class _CustomDrawerState extends State<CustomDrawer> {
           text: "About Us",
           onTap: ()  {
             NavigationServices.goNextAndKeepHistory(context: context, widget: AboutUsScreen());
-
+            setState(() {
+            });
           },
         ),
-        // DrawerLinkWidget(
-        //   icon: Icons.person_outline,
-        //   text: "Contact Us",
-        //   onTap: () async {
-        //     Get.back();
-        //   },
-        // ),
 
         ListTile(
           dense: true,

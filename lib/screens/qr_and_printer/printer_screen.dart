@@ -34,6 +34,7 @@ class _PrinterScreenState extends State<PrinterScreen> {
 
   Future getBluetooths()async{
     await getBluetooth();
+    setState(() {});
   }
 
   @override
@@ -93,6 +94,7 @@ class _PrinterScreenState extends State<PrinterScreen> {
     final List? bluetooths = await BluetoothThermalPrinter.getBluetooths;
     availableBluetoothDevices = bluetooths!;
     setState(() {});
+    print("avalible BlueTooths");
     print(availableBluetoothDevices.length);
   }
 
@@ -140,8 +142,8 @@ class _PrinterScreenState extends State<PrinterScreen> {
     bytes += generator.hr();
 
     // Print Barcode using native function
-    final List<int> barData = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 4];
-    bytes += generator.barcode(Barcode.upcA(barData));
+    // final List<int> barData = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 4];
+    // bytes += generator.barcode(Barcode.upcA(barData));
 
     bytes += generator.cut();
 
@@ -175,59 +177,7 @@ class _PrinterScreenState extends State<PrinterScreen> {
             height: PosTextSize.size1,
             width: PosTextSize.size2));
     bytes += generator.hr(ch: '=', len: 32, linesAfter: 0);
-    bytes += generator.text(
-      "For Kitchen",
-      styles: PosStyles(
-        align: PosAlign.center,
-        height: PosTextSize.size2,
-        width: PosTextSize.size2,
-      ),
-    );
-    bytes += generator.hr(ch: '=', len: 32, linesAfter: 0);
-    bytes += generator.row([
-      PosColumn(
-          text: 'name',
-          width: 2,
-          styles: PosStyles(align: PosAlign.left, bold: true)),
-      PosColumn(
-          text: 'Qty',
-          width: 2,
-          styles: PosStyles(align: PosAlign.center, bold: true)),
-      PosColumn(
-          text: 'u-price',
-          width: 2,
-          styles: PosStyles(align: PosAlign.center, bold: true)),
-      PosColumn(
-          text: 'price',
-          width: 2,
-          styles: PosStyles(align: PosAlign.right, bold: true)),
-      PosColumn(
-          text: '',
-          width: 4,
-          styles: PosStyles(align: PosAlign.right, bold: false)),
-    ]);
-    bytes += generator.row([
-      PosColumn(
-          text: '',
-          width: 2,
-          styles: PosStyles(align: PosAlign.left, bold: true)),
-      PosColumn(
-          text: '',
-          width: 2,
-          styles: PosStyles(align: PosAlign.center, bold: false)),
-      PosColumn(
-          text: '',
-          width: 2,
-          styles: PosStyles(align: PosAlign.center, bold: false)),
-      PosColumn(
-          text: '',
-          width: 2,
-          styles: PosStyles(align: PosAlign.right, bold: false)),
-      PosColumn(
-          text: '',
-          width: 4,
-          styles: PosStyles(align: PosAlign.right, bold: false)),
-    ]);
+
 
     bytes += generator.hr(len: 32);
     bytes += generator.row([
